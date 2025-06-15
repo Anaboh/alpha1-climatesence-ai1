@@ -1,17 +1,20 @@
+# Use official Node.js 18 Alpine image
 FROM node:18-alpine
+
 WORKDIR /app
-RUN npm init -y
-RUN npm install express
-COPY server.js .
+
+# Copy package files and install dependencies first (cache layer)
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
+
+# Copy all source files
+COPY . .
+
+# Build frontend
+RUN npm run build --prefix frontend
+
+# Expose port 3000
 EXPOSE 3000
-CMD ["node", "server.js"]
 
-#FROM node:18-alpine
-#WORKDIR /app
-#COPY package*.json ./
-#RUN npm install
-#COPY . .
-#RUN npm run build
-#EXPOSE 3000
-#CMD ["npm", "start"]
-
+# Start backend server
+CMD ["node", "backend/server.js"]
